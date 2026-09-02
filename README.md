@@ -264,7 +264,7 @@ then `do my standup`, then `give me a handoff`.
 
 ---
 
-## Background & notes for contributors
+## Notes for contributors
 
 - **Why no RAG for the FAQ:** DeepSeek has no embeddings endpoint, so `safety_faq`
   answers come from facts written directly in the skill instructions rather than
@@ -275,9 +275,6 @@ then `do my standup`, then `give me a handoff`.
 - **Voice output is deliberate:** references are spoken character by character
   ("T K T one zero zero five") because that's far less error-prone than saying
   a whole token out loud. That's why the raw string shows up split.
-- This project has grown out of hands-on alpha-testing of Rasa Mantle, so
-  some files (like this one) also record the working gotchas we hit along the
-  way — see `AGENTS.md` for the agent-facing build loop.
 
 See [`AGENTS.md`](AGENTS.md) for the developer-agent contract, layout, and
 build loop. Always start with `uv run python scripts/validate_project.py` and
