@@ -13,6 +13,8 @@ It is built with **Rasa Skills** (the Mantle / CALM v2 engine) and uses
 > with a seeded SQLite world — tasks, tickets, PRs, deployments, reminders —
 > so you can try every feature without wiring up a real backend.
 
+![DevPilot Inspector — Preview mode showing task dispatch](docs/images/preview.png)
+
 ---
 
 ## What DevPilot can do
