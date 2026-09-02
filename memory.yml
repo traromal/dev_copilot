@@ -1,0 +1,22 @@
+tech_id:
+  type: text
+  description: Active developer id for tool calls.
+  initial_value: "101"
+tech_first_name:
+  type: text
+  description: Developer first name used in greetings.
+  initial_value: Alex
+tech_last_name:
+  type: text
+  description: Developer last name on file.
+  initial_value: Chen
+authenticated:
+  type: bool
+  description: Whether the developer has completed badge authentication.
+  initial_value: false
+selected_job_ref:
+  type: text
+  description: Task reference the developer has selected for this request.
+selected_project:
+  type: text
+  description: Project or repo name for the selected task.
