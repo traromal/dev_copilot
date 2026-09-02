@@ -264,18 +264,5 @@ then `do my standup`, then `give me a handoff`.
 
 ---
 
-## Notes for contributors
-
-- **Why no RAG for the FAQ:** DeepSeek has no embeddings endpoint, so `safety_faq`
-  answers come from facts written directly in the skill instructions rather than
-  from a vector search.
-- **Tool placement rule:** default to `skills/<name>/tools.py` (auto-discovered).
-  Move a tool to the shared `tools/` only when **two or more** skills need it,
-  and add it to that skill's `import_tools`.
-- **Voice output is deliberate:** references are spoken character by character
-  ("T K T one zero zero five") because that's far less error-prone than saying
-  a whole token out loud. That's why the raw string shows up split.
-
 See [`AGENTS.md`](AGENTS.md) for the developer-agent contract, layout, and
-build loop. Always start with `uv run python scripts/validate_project.py` and
-`scripts/verify_setup.py` after changing skills or tools.
+build loop.
