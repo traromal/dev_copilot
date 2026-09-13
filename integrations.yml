@@ -33,3 +33,6 @@ mcp_servers:
     url: http://127.0.0.1:8000/mcp
     # token: ${MCP_LICENSES_TOKEN}   # only if the server requires auth
     # tool_timeout: 30
+  - name: slack
+    url: http://127.0.0.1:8001/mcp
+    # token: ${SLACK_BOT_TOKEN}      # sent as additional_params if set

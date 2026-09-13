@@ -36,6 +36,8 @@ Talk to it like you'd talk to a teammate:
 | `reminders` | Sets and lists personal reminders |
 | `handoff` | Builds an end-of-shift summary for the next on-call engineer |
 | `safety_faq` | Answers common development-procedure questions |
+| `license_check` | Checks license seats (GitHub Copilot, JetBrains, Figma, Sentry) via MCP |
+| `slack_post` | Posts updates to Slack — tell it what to share and it posts |
 | `intro` / `goodbye` | Opens and closes the conversation |
 
 ### Things you can say
@@ -51,6 +53,8 @@ Deploy auth-service to staging
 Any PRs waiting on me?
 Remind me to check the prod logs in 30 minutes
 Give me a handoff for the next engineer
+How many sentry seats are left?
+Post my update to slack
 ```
 
 ---
@@ -90,6 +94,46 @@ uv run python -m rasa run --enable-api --port 5006
 
 > **Windows note:** the `rasa.exe` shim is broken (`Failed to canonicalize
 > script path`). Always use `uv run python -m rasa ...`, never `uv run rasa ...`.
+
+---
+
+## Slack
+
+DevPilot can work in Slack two ways — both read/write your Slack app's tokens
+from `.env` (`SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`).
+
+### 1. Posting — the MCP bridge
+
+A small MCP server exposes Slack as a tool (`post_message`, `list_channels`),
+so any skill can post to a channel. This is what the `slack_post` skill uses.
+
+```bash
+uv run python scripts/mcp_slack_serve.py    # Slack MCP bridge on :8001
+```
+
+The `slack` entry in `integrations.yml` points at
+`http://127.0.0.1:8001/mcp`, so the model's native MCP runtime talks to Slack
+at inference time. Try it: `post my update to slack`.
+
+### 2. Talking two-way — the Socket Mode listener
+
+A small Socket Mode listener bridges Slack ↔ Rasa, so everyone in the channel
+can talk to DevPilot from Slack and get the reply back in a thread.
+
+```bash
+uv run python scripts/mcp_slack_serve.py    # MCP bridge first (Rasa needs it)
+uv run python -m rasa run --enable-api --port 5006
+uv run python scripts/slack_listener.py     # then the listener
+```
+
+Mention `@DevPilot` in the channel the listener is watching (default
+`all-devcopilot`) and it forwards your message to the Rasa REST server, then
+posts the answer in reply. The Slack app needs **Socket Mode** on and the
+`app_mention` + `message.channels` events subscribed — no public URL or ngrok
+required.
+
+> Rasa fails to start if an MCP server it depends on is down, so bring up both
+> MCP bridges (`licenses` on :8000, `slack` on :8001) before Rasa.
 
 ---
 
@@ -178,6 +222,8 @@ lib/tool_helpers.py  Helpers shared by tool functions
 data/source/         JSON seed data for Alex's world
 models/              Trained model archives (built by rasa train)
 scripts/             verify_setup.py, validate_project.py, show_demo_data.py
+scripts/mcp_*.py     Local MCP servers (licenses :8000, Slack :8001)
+scripts/slack_listener.py  Socket Mode bridge: @DevPilot mentions ↔ Rasa REST
 ```
 
 Pin: `rasa-pro==3.20.0.dev4`. LLM: DeepSeek `deepseek-chat` via the
