@@ -1,4 +1,4 @@
-# DevPilot — a developer voice copilot built on Rasa Skills
+# DevPilot
 
 DevPilot is a hands-free **voice assistant for developers**. It listens when you
 talk, figures out what you want, and does the work — pulling up your task queue,
