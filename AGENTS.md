@@ -3,7 +3,7 @@
 This directory is a **Rasa Skills / Mantle** agent that builds a
 **developer voice copilot** (DevPilot) with **Deepgram** ASR + TTS.
 
-Pin: `rasa-pro==3.20.0.dev4`. LLM: DeepSeek `deepseek-chat` via the
+Pin: `rasa-pro==3.20.0.dev6`. LLM: DeepSeek `deepseek-chat` via the
 OpenAI-compatible endpoint `https://api.deepseek.com` (model group
 `deepseek-llm` in `integrations.yml`). Scaffold command for new
 projects: `rasa init --engine mantle` (not `--template voice`).

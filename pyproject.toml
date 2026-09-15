@@ -5,7 +5,7 @@ description = "DevPilot — developer voice copilot built on Rasa Skills (Mantle
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 dependencies = [
-    "rasa-pro==3.20.0.dev4",
+    "rasa-pro==3.20.0.dev6",
     "python-dateutil>=2.9.0",
     "python-dotenv>=1.0.0",
     "slack-sdk>=3.44.1",

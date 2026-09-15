@@ -1,11 +1,16 @@
 # External integrations for the DevPilot developer agent.
 
 llm:
-  provider: openai
-  model: deepseek-chat
-  api_key_env: OPENAI_API_KEY
-  api_base: https://api.deepseek.com
-  temperature: 0.0
+  model_group: deepseek-llm
+
+model_groups:
+  - id: deepseek-llm
+    models:
+      - provider: openai
+        model: deepseek-chat
+        api_key_env: OPENAI_API_KEY
+        api_base: https://api.deepseek.com
+        temperature: 0.0
 
 channels:
   rest:
