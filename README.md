@@ -1,5 +1,11 @@
 # DevPilot
 
+    Author:        Aromal TR
+    Wave:          wave-01-mantle
+    Assessed on:   2026-09-15
+    Assessed by:   Aromal TR
+    Verified with: rasa-pro 3.20.0.dev6, Python 3.11+, uv
+
 DevPilot is a hands-free **voice assistant for developers**. It listens when you
 talk, figures out what you want, and does the work — pulling up your task queue,
 updating tickets, writing an on-call handoff, gating a deploy, or setting a
@@ -382,6 +388,17 @@ There are three ways to exercise the agent:
 
 A quick manual check after any change: `hello`, then `what tasks do I have?`,
 then `do my standup`, then `give me a handoff`.
+
+---
+
+## Known rough edges
+
+- **Cold first turn doesn't fire skills** — the bot stays in `default_session_start__main` and only routes reliably after a greeting; the real usage pattern is warm sessions.
+- **MCP servers must be up before Rasa starts** — Rasa immediately tries to connect every `mcp_servers` entry at startup and crashes with `"Failed to prepare runtime integrations"` if any is unreachable. A retry/backoff or lazy connect would make the stack more forgiving.
+- **Train-time snapshots** — tools run from a snapshot baked into `mantle_snapshot/` inside the model archive; every skills/tools tweak demands a full `rasa train` plus server restart. A hot-reload option or faster incremental rebuild would save a lot of cycles.
+- **Single-intent assumption** — a message like "task done, post to slack" occasionally routes to the wrong skill because the engine treats each message as one skill invocation. Multi-intent chaining isn't natively supported yet.
+- **Eval harness scores one-shot turns only** — the harness exercises individual scenarios but doesn't score multi-turn sessions, which is where the real developer experience lives. A session-level eval pass would surface regression more reliably.
+- Slack audio/huddles are **not** supported (Slack's API doesn't allow apps to join huddle audio).
 
 ---
 
