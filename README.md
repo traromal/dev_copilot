@@ -293,8 +293,7 @@ eval/results/        Timestamped run reports (gitignored)
 
 Pin: `rasa-pro==3.20.0.dev6`. LLM: DeepSeek `deepseek-chat` via the
 OpenAI-compatible endpoint `https://api.deepseek.com`. This is a **Skills /
-Mantle** project — do **not** add CALM v1 files (`config.yml`, `domain.yml`,
-flow YAMLs under `data/`).
+Mantle** project.
 
 ---
 
