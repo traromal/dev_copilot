@@ -5,7 +5,7 @@ talk, figures out what you want, and does the work — pulling up your task queu
 updating tickets, writing an on-call handoff, gating a deploy, or setting a
 reminder. All of it is spoken, so you never have to type.
 
-It is built with **Rasa Skills** (the Mantle / CALM v2 engine) and uses
+It is built with **Rasa Skills** (the Mantle engine) and uses
 **Deepgram** for both speech-to-text and text-to-speech, with **DeepSeek**
 (`deepseek-chat`) driving the routing and conversation.
 
@@ -214,7 +214,7 @@ calls the right tools.
   Rasa Inspector  ── Deepgram ASR (speech → text), Deepgram TTS (text → speech)
         │
         ▼
-  Rasa Mantle (CALM v2)   ← LLM picks a skill, follows its instructions
+  Rasa Mantle   ← LLM picks a skill, follows its instructions
         │
    ┌────┴──────────┐
    ▼               ▼
