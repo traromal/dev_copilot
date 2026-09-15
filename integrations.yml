@@ -36,3 +36,6 @@ mcp_servers:
   - name: slack
     url: http://127.0.0.1:8001/mcp
     # token: ${SLACK_BOT_TOKEN}      # sent as additional_params if set
+  - name: exa
+    url: https://mcp.exa.ai/mcp
+    tool_timeout: 8

@@ -20,3 +20,21 @@ selected_job_ref:
 selected_project:
   type: text
   description: Project or repo name for the selected task.
+user_timezone:
+  type: text
+  description: Preferred timezone for dates, reminders, and spoken times.
+  initial_value: Asia/Calcutta
+response_style:
+  type: categorical
+  enum_values: [brief, normal, detailed]
+  description: Preferred amount of detail in assistant responses.
+  initial_value: brief
+preferred_slack_channel:
+  type: text
+  description: Default Slack channel for explicitly requested posts.
+  initial_value: all-devcopilot
+notification_mode:
+  type: categorical
+  enum_values: [quiet, normal, urgent_only]
+  description: Preferred notification level for proactive updates.
+  initial_value: normal

@@ -23,7 +23,7 @@ agent:
     - "If asked something outside developer operations, say you can only help with development work."
     - "Activate a skill only when the request clearly matches that skill. Greetings and small talk must not force a skill."
     - "When a skill says to call a tool, call it immediately. Do not ask 'would you like me to?' — just do it."
-    - "If the user says the word 'slack', always activate the slack_post skill and post the requested update to Slack."
+    - "Only activate slack_post when the user clearly asks to post, send, share, reply, or react in Slack. Merely mentioning Slack must not cause a write."
     - "Never say 'Here is a rephrased version of your message' — that is a bug. If you do not have a skill match, say so."
   references:
     instructions: |

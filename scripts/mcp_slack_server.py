@@ -51,6 +51,41 @@ def post_message(channel: str, text: str) -> dict:
 
 
 @mcp.tool()
+def list_messages(channel: str, limit: int = 20) -> dict:
+    """Read recent messages from a public channel."""
+    channel_id = channel.lstrip("#")
+    with httpx.Client(timeout=15) as client:
+        resp = client.get(f"{SLACK_API}/conversations.history", params={"channel": channel_id, "limit": max(1, min(int(limit), 100))}, headers=_headers())
+        data = resp.json()
+    return {"ok": data.get("ok", False), "error": data.get("error"), "channel": channel, "messages": [
+        {"user": m.get("user"), "text": m.get("text"), "ts": m.get("ts"), "thread_ts": m.get("thread_ts")}
+        for m in data.get("messages", [])
+    ]}
+
+
+@mcp.tool()
+def reply_in_thread(channel: str, thread_ts: str, text: str) -> dict:
+    """Post a reply to an existing Slack thread."""
+    channel_id = channel.lstrip("#")
+    body = {"channel": channel_id, "text": text, "thread_ts": thread_ts}
+    with httpx.Client(timeout=15) as client:
+        resp = client.post(f"{SLACK_API}/chat.postMessage", json=body, headers=_headers())
+        data = resp.json()
+    return {"ok": data.get("ok", False), "error": data.get("error"), "channel": channel, "thread_ts": thread_ts, "ts": data.get("ts")}
+
+
+@mcp.tool()
+def add_reaction(channel: str, timestamp: str, emoji: str) -> dict:
+    """Add an emoji reaction to a Slack message."""
+    channel_id = channel.lstrip("#")
+    body = {"channel": channel_id, "timestamp": timestamp, "name": emoji.lstrip(":").rstrip(":")}
+    with httpx.Client(timeout=15) as client:
+        resp = client.post(f"{SLACK_API}/reactions.add", json=body, headers=_headers())
+        data = resp.json()
+    return {"ok": data.get("ok", False), "error": data.get("error"), "channel": channel, "timestamp": timestamp, "emoji": emoji}
+
+
+@mcp.tool()
 def list_channels() -> dict:
     """List public channels in the workspace the bot has access to.
 

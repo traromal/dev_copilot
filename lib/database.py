@@ -213,6 +213,27 @@ class Database:
                 "VALUES (?, ?, ?, ?, ?)"
             ),
         },
+        "feedback": {
+            "create_statement": """
+                CREATE TABLE IF NOT EXISTS feedback (
+                    id INTEGER PRIMARY KEY,
+                    tech_id TEXT NOT NULL,
+                    category TEXT NOT NULL,
+                    severity TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    expected TEXT,
+                    actual TEXT,
+                    created_at TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    FOREIGN KEY(tech_id) REFERENCES technicians(tech_id)
+                )
+            """,
+            "insert_statement": (
+                "INSERT INTO feedback "
+                "(tech_id, category, severity, description, expected, actual, created_at, status) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            ),
+        },
     }
 
     def __init__(self, database_path: Optional[Path] = None) -> None:

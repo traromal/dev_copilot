@@ -8,6 +8,6 @@ description: >
 Thank the developer briefly.
 
 Ask for a quick thumbs-up or thumbs-down on how the session went.
-If they give feedback, acknowledge it in one short sentence.
+If they give a comment, acknowledge it in one short sentence.
 
 Say goodbye and end.

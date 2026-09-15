@@ -37,7 +37,15 @@ Talk to it like you'd talk to a teammate:
 | `handoff` | Builds an end-of-shift summary for the next on-call engineer |
 | `safety_faq` | Answers common development-procedure questions |
 | `license_check` | Checks license seats (GitHub Copilot, JetBrains, Figma, Sentry) via MCP |
-| `slack_post` | Posts updates to Slack — tell it what to share and it posts |
+| `slack_post` | Posts/reads/replies in Slack with confirmation gates |
+| `engineering_briefing` | Full cross-skill status across tickets, PRs, CI, deploys, and approvals |
+| `incident_triage` | Triages an incoming incident from spoken notes |
+| `incident_mode` | Puts the agent into focused incident-handling mode |
+| `release_notes` | Drafts release notes from recent work |
+| `preferences` | Saves personal settings (timezone, response style, Slack channel) |
+| `feedback` | Logs feedback and bug reports about the assistant itself |
+| `docs_lookup` | Searches the web for current documentation via Exa MCP |
+| `help` | Full capability list and examples |
 | `intro` / `goodbye` | Opens and closes the conversation |
 
 ### Things you can say
@@ -55,6 +63,9 @@ Remind me to check the prod logs in 30 minutes
 Give me a handoff for the next engineer
 How many sentry seats are left?
 Post my update to slack
+What do the latest Rasa docs say about slot extraction?
+Draft release notes for this sprint
+Set my timezone to US Pacific
 ```
 
 ---
@@ -81,10 +92,11 @@ Train the model, then run:
 
 ```bash
 uv run python -m rasa train
-uv run python -m rasa inspect
+uv run python -m rasa run --enable-api --port 5005 --inspect
 ```
 
-Open the Inspector at `http://localhost:5005/webhooks/inspector/inspect.html`
+Open the Inspector at
+`http://localhost:5005/webhooks/inspector/inspect.html`
 and start talking. If you'd rather drive it from code, run a second server in
 REST mode on another port:
 
@@ -94,6 +106,7 @@ uv run python -m rasa run --enable-api --port 5006
 
 > **Windows note:** the `rasa.exe` shim is broken (`Failed to canonicalize
 > script path`). Always use `uv run python -m rasa ...`, never `uv run rasa ...`.
+> Use `--inspect` on the first Rasa process to serve the Inspector UI.
 
 ---
 
@@ -134,6 +147,54 @@ required.
 
 > Rasa fails to start if an MCP server it depends on is down, so bring up both
 > MCP bridges (`licenses` on :8000, `slack` on :8001) before Rasa.
+
+---
+
+## Web search — Exa MCP
+
+DevPilot can search the web for up-to-date documentation using the
+[Exa](https://exa.ai) hosted MCP server (keyless, no API key required).
+When a developer asks a question not covered by the internal FAQ, the
+`safety_faq` skill hands off to `docs_lookup`, which calls `web_search_exa`
+and `web_fetch_exa` to find and cite current docs.
+
+```yaml
+# integrations.yml (excerpt)
+mcp_servers:
+  - name: exa
+    url: https://mcp.exa.ai/mcp
+    tool_timeout: 8
+```
+
+Try it: `what do the latest Rasa docs say about slot extraction?`
+
+---
+
+## Evaluation harness
+
+The project includes a simulation/evaluation harness for automated scenario
+testing against a live Rasa server.
+
+```bash
+# run all scenarios (uses eval/conftest.yml for LLM config)
+uv run python scripts/run_eval.py
+
+# run a single scenario
+uv run python scripts/run_eval.py --scenario eval/scenarios/dispatch_queue.yml
+```
+
+Scenarios live in `eval/scenarios/` and results are written to
+`eval/results/<timestamp>/`. The harness drives the agent through multi-turn
+conversations and scores the responses using LLM-as-judge (with a DeepSeek
+`deepseek-chat` fallback for structured-output modes).
+
+### Scenarios
+
+| Scenario | What it tests |
+| --- | --- |
+| `dispatch_queue` | Lists today's tasks with priority and SLA |
+| `license_check_seats` | Checks license seat availability |
+| `slack_post_deploy` | Posts a deployment update to Slack |
 
 ---
 
@@ -211,11 +272,11 @@ Two skills are the best showcases of layered control:
 
 ```
 agent.yml            Identity, persona, voice flags, and global rules
-integrations.yml     DeepSeek LLM + Inspector channel with Deepgram ASR/TTS
+integrations.yml     DeepSeek LLM + Inspector channel with Deepgram ASR/TTS + MCP servers
 endpoints.yml        Response rephraser and optional platform services
 memory.yml           Project-wide session memory
 responses.yml        Project-wide verbatim responses (greeting, fallback)
-skills/<name>/       One folder per skill: skill.md, optional tools.py
+skills/<name>/       One folder per skill: skill.md, optional tools.py, memory.yml, responses.yml
 tools/operations.py  Shared tools only (used by 2+ skills)
 lib/database.py      SQLite demo backend (schema + seeding)
 lib/tool_helpers.py  Helpers shared by tool functions
@@ -224,6 +285,10 @@ models/              Trained model archives (built by rasa train)
 scripts/             verify_setup.py, validate_project.py, show_demo_data.py
 scripts/mcp_*.py     Local MCP servers (licenses :8000, Slack :8001)
 scripts/slack_listener.py  Socket Mode bridge: @DevPilot mentions ↔ Rasa REST
+scripts/run_eval.py  Eval harness driver (DeepSeek prompt-only fallback)
+eval/conftest.yml    Eval LLM config (simulator + judge both use DeepSeek)
+eval/scenarios/      YAML scenario definitions for automated testing
+eval/results/        Timestamped run reports (gitignored)
 ```
 
 Pin: `rasa-pro==3.20.0.dev4`. LLM: DeepSeek `deepseek-chat` via the
@@ -267,8 +332,15 @@ uv run python -m rasa train                # build the model (bakes in code)
 ### Run
 
 ```bash
-uv run python -m rasa inspect                          # Inspector UI on :5005
-uv run python -m rasa run --enable-api --port 5006     # REST API, for code
+uv run python -m rasa run --enable-api --port 5005 --inspect   # Inspector UI on :5005
+uv run python -m rasa run --enable-api --port 5006             # REST API, for code
+```
+
+### Run the eval harness
+
+```bash
+uv run python scripts/run_eval.py                            # all scenarios
+uv run python scripts/run_eval.py --scenario eval/scenarios/dispatch_queue.yml
 ```
 
 ### Kill the servers
@@ -297,7 +369,7 @@ Remove-Item $env:TEMP\tmp*\mantle_snapshot -Recurse -Force
 
 ## Testing
 
-There are two ways to exercise the agent:
+There are three ways to exercise the agent:
 
 1. **Inspector UI** (`http://localhost:5005/webhooks/inspector/inspect.html`) —
    talk or type like a human, watch the skills activate.
@@ -306,6 +378,8 @@ There are two ways to exercise the agent:
    scenarios (greeting, dispatch, tickets, standup, PRs, reminders, handoff,
    incident filing, deploy gating, hardware ordering) and handles the
    confirmation/ordered-block loops the way a person would.
+3. **Eval harness** (`scripts/run_eval.py`) — full simulation/evaluation with
+   LLM-as-judge scoring, automated assertions, and timestamped result reports.
 
 A quick manual check after any change: `hello`, then `what tasks do I have?`,
 then `do my standup`, then `give me a handoff`.
